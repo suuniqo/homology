@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Iterable
 
 class SimplicialComplex:
     @staticmethod
@@ -15,14 +15,14 @@ class SimplicialComplex:
         return res
 
     @staticmethod
-    def is_face(face: tuple[int, ...], simplicial: tuple[int, ...]) -> bool:
-        return all(i in simplicial for i in face)
+    def is_face(s1: tuple[int, ...], s2: tuple[int, ...]) -> bool:
+        return all(i in s2 for i in s1)
 
     @staticmethod
-    def are_disjoint(s1: tuple[int, ...], s2: tuple[int, ...]) -> bool:
+    def is_disjoint(s1: tuple[int, ...], s2: tuple[int, ...]) -> bool:
         return all(i not in s1 for i in s2)
 
-    def __init__(self, generator: list[tuple[int, ...]]) -> None:
+    def __init__(self, generator: Iterable[tuple[int, ...]]) -> None:
         self.cardinality = 0
         self.face_set = set() 
 
@@ -46,20 +46,9 @@ class SimplicialComplex:
 
         return res
 
-    def closed_st(self, simplicial: tuple[int, ...]) -> Self:
+    def closed_st(self, simplicial: tuple[int, ...]) -> SimplicialComplex:
         return SimplicialComplex(self.st(simplicial))
 
     def lk(self, simplicial: tuple[int, ...]) -> set[tuple[int, ...]]:
         closed = self.closed_st(simplicial)
-        return {elem for elem in closed.face_set if self.are_disjoint(simplicial, elem)}
-        
-
-sc = SimplicialComplex([(0,1,2,3)])
-
-print(sc.st((0, 1)))
-
-x = sc.closed_st((0, 1))
-print(x.face_set)
-
-print(sc.lk((0, 1)))
-
+        return {elem for elem in closed.face_set if self.is_disjoint(simplicial, elem)}
