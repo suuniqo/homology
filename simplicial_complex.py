@@ -1,20 +1,8 @@
 from typing import Iterable
 from collections import defaultdict
+import utils
 
 class SimplicialComplex:
-    @staticmethod
-    def _power_set(simplicial: tuple[int, ...]) -> list[tuple[int, ...]]:
-        n = len(simplicial)
-
-        res = []
-
-        for i in range(1, 1 << n):
-            res.append(tuple(
-                simplicial[j] for j in range(n) if i & (1 << j)
-            ))
-        
-        return res
-
     @staticmethod
     def _euler_characteristic(face_set: set[tuple[int, ...]]) -> int:
         chi = 0
@@ -40,7 +28,7 @@ class SimplicialComplex:
         self.face_set = set() 
 
         for simplicial in generator:
-            self.face_set.update(self._power_set(simplicial))
+            self.face_set.update(utils.power_set(simplicial))
             if len(simplicial) > self.cardinality:
                 self.cardinality = len(simplicial)
 
@@ -106,3 +94,20 @@ class SimplicialComplex:
             components += 1
 
         return components
+    
+    def insert(self, generator: Iterable[tuple[int, ...]]) -> set[tuple[int, ...]]:
+        additions = set()
+
+        for simplicial in generator:
+            power_set = utils.power_set(simplicial)
+            difference = set(power_set) - self.face_set
+
+            additions.update(difference)
+            self.face_set.update(difference)
+
+            if len(simplicial) > self.cardinality:
+                self.cardinality = len(simplicial)
+
+        self.euler_characteristic += self._euler_characteristic(additions)
+
+        return additions
