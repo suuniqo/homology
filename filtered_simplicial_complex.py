@@ -1,12 +1,12 @@
 from collections import defaultdict
-from typing import Iterable
+from typing import Iterable, Optional
 import utils
 
 from simplicial_complex import SimplicialComplex
 
 class FilteredSimplicialComplex():
     def _finish_insertion(self, additions: set[tuple[int, ...]], time: float) -> None:
-        self.timestamps[time].update(self.sc.face_set)
+        self.timestamps[time].update(additions)
 
         for addition in additions:
             self.time_of[addition] = time
@@ -36,3 +36,26 @@ class FilteredSimplicialComplex():
 
         self.sc = new_sc
         self._finish_insertion(additions, time)
+
+    @property
+    def filtration_order(self) -> list[tuple[int, ...]]:
+        return [
+            simp 
+            for _, v in sorted(self.timestamps.items()) 
+            for simp in sorted(v, key=len)
+        ]
+
+    def filtration(self, time: float) -> SimplicialComplex:
+        return SimplicialComplex(
+            simplex 
+            for k, v in self.timestamps.items() 
+            if k <= time 
+            for simplex in v
+        )
+
+    def threshold(self, simplex: tuple[int, ...]) -> Optional[float]:
+        return self.time_of.get(simplex)
+
+    @property
+    def face_set(self) -> set[tuple[int, ...]]:
+        return self.sc.face_set
