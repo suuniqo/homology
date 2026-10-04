@@ -36,7 +36,7 @@ class SimplicialComplex:
         self.euler_characteristic = self._euler_characteristic(self.face_set)
 
     @property
-    def dimension(self):
+    def dimension(self) -> int:
         return self.cardinality - 1
 
     def n_faces(self, dim: int) -> set[tuple[int, ...]]:

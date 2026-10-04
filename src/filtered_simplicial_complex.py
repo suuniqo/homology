@@ -18,6 +18,18 @@ class FilteredSimplicialComplex():
         self.time_of = {}
 
         self._finish_insertion(self.sc.face_set, 0.0)
+
+    @property
+    def face_set(self) -> set[tuple[int, ...]]:
+        return self.sc.face_set
+
+    @property
+    def filtration_order(self) -> list[tuple[int, ...]]:
+        return [
+            simp 
+            for _, v in sorted(self.timestamps.items()) 
+            for simp in sorted(v, key=len)
+        ]
     
     def insert(self, generator: Iterable[tuple[int, ...]], time: float) -> None:
         for face in generator:
@@ -37,14 +49,6 @@ class FilteredSimplicialComplex():
         self.sc = new_sc
         self._finish_insertion(additions, time)
 
-    @property
-    def filtration_order(self) -> list[tuple[int, ...]]:
-        return [
-            simp 
-            for _, v in sorted(self.timestamps.items()) 
-            for simp in sorted(v, key=len)
-        ]
-
     def filtration(self, time: float) -> SimplicialComplex:
         return SimplicialComplex(
             simplex 
@@ -55,7 +59,3 @@ class FilteredSimplicialComplex():
 
     def threshold(self, simplex: tuple[int, ...]) -> Optional[float]:
         return self.time_of.get(simplex)
-
-    @property
-    def face_set(self) -> set[tuple[int, ...]]:
-        return self.sc.face_set
