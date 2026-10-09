@@ -9,7 +9,7 @@ class SimplicialComplex:
         chi = 0
 
         for face in face_set:
-            if len(face) - 1 % 2 == 0:
+            if (len(face) - 1) % 2 == 0:
                 chi += 1
             else:
                 chi -= 1
