@@ -1,5 +1,7 @@
+from __future__ import annotations
 from collections import defaultdict
 from typing import Iterable, Optional
+from itertools import product
 import utils
 
 from simplicial_complex import SimplicialComplex
@@ -59,3 +61,31 @@ class FilteredSimplicialComplex():
 
     def threshold(self, simplex: tuple[int, ...]) -> Optional[float]:
         return self.time_of.get(simplex)
+
+    def treshold_values(self) -> list[float]:
+        return list(sorted(self.timestamps.keys()))
+
+    @classmethod
+    def vietoris_rips(cls, points: list[tuple[int, ...]]) -> FilteredSimplicialComplex:
+        n = len(points)
+        dist = {
+            i : {
+                j: utils.sq_distance(points[i], points[j])
+                for j in range(n)
+            }
+            for i in range(n)
+        }
+
+        dist_rev = defaultdict(set)
+        for i, j in product(range(n), repeat=2):
+            d = dist[i][j]
+            dist_rev[d].update((i, j))
+
+        sc = FilteredSimplicialComplex((i,) for i in range(n))
+
+        for d in sorted(dist_rev.keys()):
+            pass
+
+        ...
+        return sc
+        
