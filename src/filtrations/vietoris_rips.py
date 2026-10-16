@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import product
 from functools import reduce
+import math
 
 from simplicial import Simplicial
 from filtered_simplicial_complex import FilteredSimplicialComplex
@@ -12,6 +13,7 @@ class VitorisRipsFiltration:
         self.sc = FilteredSimplicialComplex(Simplicial((i,)) for i in range(len(points)))
 
     def _max_simplex(self, simplex: Simplicial, neigs: dict[int, set[int]]) -> set[Simplicial]:
+        # print(simplex.vertices)
         # TODO: Make `res` a accumulation parameter instead of returning and copying it
         res = set()
 
@@ -30,20 +32,23 @@ class VitorisRipsFiltration:
         dist = {
             i : {
                 j: utils.f_sq_distance(self.points[i], self.points[j])
-                for j in range(n)
+                for j in range(n) 
+                if i != j
             }
             for i in range(n)
         }
 
         dist_rev: dict[float, set[Simplicial]] = defaultdict(set)
         for i, j in product(range(n), repeat=2):
-            d = dist[i][j]
-            dist_rev[d].update([Simplicial((i, j))])
+            if i != j:
+                d = dist[i][j]
+                dist_rev[d].update([Simplicial((i, j))])
 
         neig: dict[int, set[int]] = defaultdict(set)
 
         for d in sorted(dist_rev.keys()):
-            self.sc.insert(dist_rev[d], d)
+            time = math.sqrt(d) / 2
+            self.sc.insert(dist_rev[d], time)
             
             for simplicial in dist_rev[d]:
                 u, v = simplicial
@@ -56,7 +61,7 @@ class VitorisRipsFiltration:
                         for simpl in self._max_simplex(simplicial, neig) 
                         if simpl not in self.sc.face_set
                     ), 
-                    d
+                    time
                 )
 
         return self.sc
