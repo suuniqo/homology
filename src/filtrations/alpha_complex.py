@@ -1,20 +1,21 @@
 import utils
 import math
 
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
 from scipy.spatial import Voronoi, voronoi_plot_2d
-from typing import Optional
-
 from scipy.spatial import Delaunay
 
+from simplicial import Simplicial
 from filtered_simplicial_complex import FilteredSimplicialComplex
 
 
 class AlphaFiltration():
     def __init__(self, points: list[tuple[float, ...]]) -> None:
-        self.points = points
+        self.points: list[tuple[float, ...]] = points
 
     @staticmethod
     def draw(points: list[tuple[float, ...]], fsc: FilteredSimplicialComplex, time: Optional[float] = None) -> None:
@@ -29,15 +30,15 @@ class AlphaFiltration():
         voronoi_plot_2d(voronoi, show_vertices=False, line_width=2, line_colors='red')
 
         for simplicial in sc.face_set:
-            if len(simplicial) == 1:
+            if simplicial.dim() == 0:
                 u = points[simplicial[0]]
                 plt.plot(u[0], u[1], 'ko')
 
-            if len(simplicial) == 2:
+            if simplicial.dim() == 1:
                 u, v = points[simplicial[0]], points[simplicial[1]]
                 plt.plot([u[0], v[0]], [u[1], v[1]], color='k', lw=2)
 
-            if len(simplicial) == 3:
+            if simplicial.dim() == 2:
                 plt.tripcolor(
                     [points[simplicial[i]][0] for i in range(3)],
                     [points[simplicial[i]][1] for i in range(3)],
@@ -63,7 +64,7 @@ class AlphaFiltration():
             for i in range(n)
         }
 
-        sc = FilteredSimplicialComplex((i,) for i in range(n))
+        sc = FilteredSimplicialComplex(Simplicial((i,)) for i in range(n))
 
         # Generate the Delaunay complex
         dl = Delaunay(self.points)
@@ -98,9 +99,9 @@ class AlphaFiltration():
                 two_dims[(v, w)] = center
 
         for simpl, value in two_dims.items():
-            sc.insert([simpl], value)
+            sc.insert([Simplicial(simpl)], value)
 
         for simpl, value in three_dims.items():
-            sc.insert([simpl], value)
+            sc.insert([Simplicial(simpl)], value)
 
         return sc

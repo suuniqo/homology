@@ -1,64 +1,55 @@
 from __future__ import annotations
 from typing import Iterable
 from collections import defaultdict
-import utils
+from simplicial import Simplicial
 
 class SimplicialComplex:
     @staticmethod
-    def _euler_characteristic(face_set: set[tuple[int, ...]]) -> int:
+    def _euler_characteristic(face_set: set[Simplicial]) -> int:
         chi = 0
 
         for face in face_set:
-            if (len(face) - 1) % 2 == 0:
+            if face.dim() % 2 == 0:
                 chi += 1
             else:
                 chi -= 1
 
         return chi
 
-    @staticmethod
-    def is_face(s1: tuple[int, ...], s2: tuple[int, ...]) -> bool:
-        return all(i in s2 for i in s1)
-
-    @staticmethod
-    def is_disjoint(s1: tuple[int, ...], s2: tuple[int, ...]) -> bool:
-        return all(i not in s1 for i in s2)
-
-    def __init__(self, generator: Iterable[tuple[int, ...]]) -> None:
-        self.cardinality = 0
-        self.face_set = set() 
+    def __init__(self, generator: Iterable[Simplicial]) -> None:
+        self.dim: int = -1
+        self.face_set: set[Simplicial] = set()
 
         for simplicial in generator:
-            self.face_set.update(utils.power_set(simplicial))
-            if len(simplicial) > self.cardinality:
-                self.cardinality = len(simplicial)
+            faces = simplicial.faces()
 
-        self.euler_characteristic = self._euler_characteristic(self.face_set)
+            self.face_set.update(faces)
 
-    @property
-    def dimension(self) -> int:
-        return self.cardinality - 1
+            if simplicial.dim() > self.dim:
+                self.dim = simplicial.dim()
 
-    def n_faces(self, dim: int) -> set[tuple[int, ...]]:
-        return {face for face in self.face_set if len(face) - 1 == dim}
+        self.euler_characteristic: int = self._euler_characteristic(self.face_set)
 
-    def skeleton(self, dim: int) -> set[tuple[int, ...]]:
-        return {face for face in self.face_set if len(face) - 1 <= dim}
+    def n_faces(self, dim: int) -> set[Simplicial]:
+        return {face for face in self.face_set if face.dim() == dim}
 
-    def st(self, simplicial: tuple[int, ...]) -> set[tuple[int, ...]]:
-        res = {member for member in self.face_set if self.is_face(simplicial, member)}
+    def skeleton(self, dim: int) -> set[Simplicial]:
+        return {face for face in self.face_set if face.dim() <= dim}
+
+    def st(self, simplicial: Simplicial) -> set[Simplicial]:
+        res = {member for member in self.face_set if simplicial.is_face(member)}
 
         if not res:
             raise ValueError("'simplicial' is not a face")
 
         return res
 
-    def closed_st(self, simplicial: tuple[int, ...]) -> SimplicialComplex:
+    def closed_st(self, simplicial: Simplicial) -> SimplicialComplex:
         return SimplicialComplex(self.st(simplicial))
 
-    def lk(self, simplicial: tuple[int, ...]) -> set[tuple[int, ...]]:
+    def lk(self, simplicial: Simplicial) -> set[Simplicial]:
         closed = self.closed_st(simplicial)
-        return {elem for elem in closed.face_set if self.is_disjoint(simplicial, elem)}
+        return {elem for elem in closed.face_set if simplicial.is_disjoint(elem)}
 
     def graph(self) -> dict[int, list[int]]:
         graph = defaultdict(list)
@@ -95,19 +86,18 @@ class SimplicialComplex:
             components += 1
 
         return components
-    
-    def insert(self, generator: Iterable[tuple[int, ...]]) -> set[tuple[int, ...]]:
+
+    def insert(self, generator: Iterable[Simplicial]) -> set[Simplicial]:
         additions = set()
 
         for simplicial in generator:
-            power_set = utils.power_set(simplicial)
-            difference = set(power_set) - self.face_set
+            difference = simplicial.faces() - self.face_set
 
             additions.update(difference)
             self.face_set.update(difference)
 
-            if len(simplicial) > self.cardinality:
-                self.cardinality = len(simplicial)
+            if simplicial.dim() > self.dim:
+                self.dim = simplicial.dim()
 
         self.euler_characteristic += self._euler_characteristic(additions)
 

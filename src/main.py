@@ -1,4 +1,4 @@
-from filtrations.alpha import AlphaFiltration
+from filtrations.alpha_complex import AlphaFiltration
 
 def main():
     points = [(0.38021546727456423, 0.46419202339598786), (0.7951628297672293, 0.49263630135869474), 

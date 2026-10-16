@@ -1,39 +1,40 @@
 from __future__ import annotations
+
 from collections import defaultdict
 from typing import Iterable, Optional
-from itertools import product
-import utils
 
+from simplicial import Simplicial
 from simplicial_complex import SimplicialComplex
 
+
 class FilteredSimplicialComplex():
-    def _finish_insertion(self, additions: set[tuple[int, ...]], time: float) -> None:
+    def _finish_insertion(self, additions: set[Simplicial], time: float) -> None:
         self.timestamps[time].update(additions)
 
         for addition in additions:
             self.time_of[addition] = time
 
-    def __init__(self, generator: Iterable[tuple[int, ...]]) -> None:
-        self.sc = SimplicialComplex(generator)
+    def __init__(self, generator: Iterable[Simplicial]) -> None:
+        self.sc: SimplicialComplex = SimplicialComplex(generator)
 
-        self.timestamps = defaultdict(set)
-        self.time_of = {}
+        self.timestamps: dict[float, set[Simplicial]] = defaultdict(set)
+        self.time_of: dict[Simplicial, float] = {}
 
         self._finish_insertion(self.sc.face_set, 0.0)
 
     @property
-    def face_set(self) -> set[tuple[int, ...]]:
+    def face_set(self) -> set[Simplicial]:
         return self.sc.face_set
 
     @property
-    def filtration_order(self) -> list[tuple[int, ...]]:
+    def filtration_order(self) -> list[Simplicial]:
         return [
             simp 
             for _, v in sorted(self.timestamps.items()) 
-            for simp in sorted(v, key=len)
+            for simp in sorted(v, key=Simplicial.dim)
         ]
     
-    def insert(self, generator: Iterable[tuple[int, ...]], time: float) -> None:
+    def insert(self, generator: Iterable[Simplicial], time: float) -> None:
         for face in generator:
             if face in self.sc.face_set:
                 raise ValueError("'generator' contains an already added face")
@@ -42,7 +43,7 @@ class FilteredSimplicialComplex():
         additions = new_sc.insert(generator)
 
         for addition in additions:
-            for face in utils.power_set(addition):
+            for face in addition.faces():
                 t = self.time_of.get(face)
 
                 if t and t > time:
@@ -53,39 +54,14 @@ class FilteredSimplicialComplex():
 
     def filtration(self, time: float) -> SimplicialComplex:
         return SimplicialComplex(
-            simplex 
+            simplicial 
             for k, v in self.timestamps.items() 
             if k <= time 
-            for simplex in v
+            for simplicial in v
         )
 
-    def threshold(self, simplex: tuple[int, ...]) -> Optional[float]:
-        return self.time_of.get(simplex)
+    def threshold(self, simplicial: Simplicial) -> Optional[float]:
+        return self.time_of.get(simplicial)
 
     def threshold_values(self) -> list[float]:
         return list(sorted(self.timestamps.keys()))
-
-    @classmethod
-    def vietoris_rips(cls, points: list[tuple[int, ...]]) -> FilteredSimplicialComplex:
-        n = len(points)
-        dist = {
-            i : {
-                j: utils.sq_distance(points[i], points[j])
-                for j in range(n)
-            }
-            for i in range(n)
-        }
-
-        dist_rev = defaultdict(set)
-        for i, j in product(range(n), repeat=2):
-            d = dist[i][j]
-            dist_rev[d].update((i, j))
-
-        sc = FilteredSimplicialComplex((i,) for i in range(n))
-
-        for d in sorted(dist_rev.keys()):
-            pass
-
-        ...
-        return sc
-        
