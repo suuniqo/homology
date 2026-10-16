@@ -62,7 +62,7 @@ class FilteredSimplicialComplex():
     def threshold(self, simplex: tuple[int, ...]) -> Optional[float]:
         return self.time_of.get(simplex)
 
-    def treshold_values(self) -> list[float]:
+    def threshold_values(self) -> list[float]:
         return list(sorted(self.timestamps.keys()))
 
     @classmethod

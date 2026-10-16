@@ -46,8 +46,8 @@ def distance_to_center(p: tuple[float, ...], q: tuple[float, ...], r: tuple[floa
     radius = (a * b * c) / (4 * area)
     return radius
 
-def median_point(p: tuple[int, ...], q: tuple[int, ...]) -> tuple[float, ...]:
+def median_point(p: tuple[float, ...], q: tuple[float, ...]) -> tuple[float, ...]:
     if len(p) != len(q):
         raise ValueError("Points have different dimensions!")
 
-    return tuple(float(pi + qi) / 2 for pi, qi in zip(p, q))
+    return tuple((pi + qi) / 2 for pi, qi in zip(p, q))
