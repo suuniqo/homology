@@ -3,65 +3,81 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Iterable, Optional
 
-from simplicial import Simplicial
+from simplex import Simplex
 from simplicial_complex import SimplicialComplex
 
 
-class FilteredSimplicialComplex():
-    def _finish_insertion(self, additions: set[Simplicial], time: float) -> None:
+class FilteredSimplicialComplex:
+    """Represents a simplicial complex whose simplices carry filtration timestamps."""
+
+    def _finish_insertion(self, additions: set[Simplex], time: float) -> None:
+        """Add simplices to the timestamp dictionary."""
         self.timestamps[time].update(additions)
 
         for addition in additions:
             self.time_of[addition] = time
 
-    def __init__(self, generator: Iterable[Simplicial]) -> None:
+    def __init__(self, generator: Iterable[Simplex]) -> None:
+        """Initialize the filtered complex with a set of simplices."""
         self.sc: SimplicialComplex = SimplicialComplex(generator)
 
-        self.timestamps: dict[float, set[Simplicial]] = defaultdict(set)
-        self.time_of: dict[Simplicial, float] = {}
+        self.timestamps: dict[float, set[Simplex]] = defaultdict(set)
+        self.time_of: dict[Simplex, float] = {}
 
         self._finish_insertion(self.sc.face_set, 0.0)
 
     @property
-    def face_set(self) -> set[Simplicial]:
+    def face_set(self) -> set[Simplex]:
+        """Return the face set."""
         return self.sc.face_set
 
     @property
-    def filtration_order(self) -> list[Simplicial]:
+    def filtration_order(self) -> list[Simplex]:
+        """Return the filtration order as a sorted list of simplices."""
         return [
-            simp 
+            simplex 
             for _, v in sorted(self.timestamps.items()) 
-            for simp in sorted(v, key=Simplicial.dim)
+            for simplex in sorted(v, key=lambda s: (s.dim(), s.vertices))
         ]
     
-    def insert(self, generator: Iterable[Simplicial], time: float) -> None:
-        for face in generator:
-            if face in self.sc.face_set:
-                raise ValueError("'generator' contains an already added face")
+    def insert(self, generator: Iterable[Simplex], time: float) -> None:
+        """Insert a generator of simplices at the given timestamp."""
+        generator = list(generator)
 
-        new_sc = SimplicialComplex(self.sc.face_set)
-        additions = new_sc.insert(generator)
+        for simplex in generator:
+            if simplex in self.sc.face_set:
+                raise ValueError("'generator' contains an already added simplex")
+
+        additions: set[Simplex] = set()
+
+        for simplex in generator:
+            additions.update(simplex.faces())
+
+        additions -= self.sc.face_set
 
         for addition in additions:
             for face in addition.faces():
                 t = self.time_of.get(face)
 
-                if t and t > time:
+                if t is not None and t > time:
                     raise ValueError("'generator' contains a face with a bad time value")
 
-        self.sc = new_sc
+        self.sc.insert(generator)
         self._finish_insertion(additions, time)
 
     def filtration(self, time: float) -> SimplicialComplex:
+        """Return the simplicial complex at the given timestamp."""
         return SimplicialComplex(
-            simplicial 
+            simplex 
             for k, v in self.timestamps.items() 
             if k <= time 
-            for simplicial in v
+            for simplex in v
         )
 
-    def threshold(self, simplicial: Simplicial) -> Optional[float]:
-        return self.time_of.get(simplicial)
+    def threshold(self, simplex: Simplex) -> Optional[float]:
+        """Compute the threshold value of a simplex."""
+        return self.time_of.get(simplex)
 
     def threshold_values(self) -> list[float]:
-        return list(sorted(self.timestamps.keys()))
+        """Return the sorted list of all threshold values."""
+        return sorted(self.timestamps.keys())

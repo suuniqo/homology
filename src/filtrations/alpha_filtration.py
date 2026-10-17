@@ -9,16 +9,18 @@ import matplotlib.colors
 from scipy.spatial import Voronoi, voronoi_plot_2d
 from scipy.spatial import Delaunay
 
-from simplicial import Simplicial
+from simplex import Simplex
 from filtered_simplicial_complex import FilteredSimplicialComplex
 
 
-class AlphaFiltration():
+class AlphaFiltration:
+    """Builds the Alpha complex filtration of a planar point cloud."""
+
     def __init__(self, points: list[tuple[float, ...]]) -> None:
         self.points: list[tuple[float, ...]] = points
 
     @staticmethod
-    def draw(points: list[tuple[float, ...]], fsc: FilteredSimplicialComplex, time: Optional[float] = None) -> None:
+    def plot_2d(points: list[tuple[float, ...]], fsc: FilteredSimplicialComplex, time: Optional[float] = None) -> None:
         if time is None:
             sc = fsc.sc
         else:
@@ -58,13 +60,13 @@ class AlphaFiltration():
 
         dist = {
             i : {
-                j: utils.f_sq_distance(self.points[i], self.points[j])
+                j: utils.sq_distance(self.points[i], self.points[j])
                 for j in range(n)
             }
             for i in range(n)
         }
 
-        sc = FilteredSimplicialComplex(Simplicial((i,)) for i in range(n))
+        sc = FilteredSimplicialComplex(Simplex((i,)) for i in range(n))
 
         # Generate the Delaunay complex
         dl = Delaunay(self.points)
@@ -89,19 +91,19 @@ class AlphaFiltration():
             three_dims[(u, v, w)] = center
 
             # Check if the edges use the second case
-            if utils.f_sq_distance(utils.median_point(x, y), z) < (dist[u][v] / 4):
+            if utils.sq_distance(utils.median_point(x, y), z) < (dist[u][v] / 4):
                 two_dims[(u, v)] = center
 
-            if utils.f_sq_distance(utils.median_point(x, z), y) < (dist[u][w] / 4):
+            if utils.sq_distance(utils.median_point(x, z), y) < (dist[u][w] / 4):
                 two_dims[(u, w)] = center
 
-            if utils.f_sq_distance(utils.median_point(y, z), x) < (dist[v][w] / 4):
+            if utils.sq_distance(utils.median_point(y, z), x) < (dist[v][w] / 4):
                 two_dims[(v, w)] = center
 
         for simpl, value in two_dims.items():
-            sc.insert([Simplicial(simpl)], value)
+            sc.insert([Simplex(simpl)], value)
 
         for simpl, value in three_dims.items():
-            sc.insert([Simplicial(simpl)], value)
+            sc.insert([Simplex(simpl)], value)
 
         return sc

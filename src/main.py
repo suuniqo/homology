@@ -1,5 +1,4 @@
-from filtrations.alpha_complex import AlphaFiltration
-from filtrations.vietoris_rips import VitorisRipsFiltration
+from filtrations.vietoris_rips_filtration import VietorisRipsFiltration
 
 def main():
     points = [(0.38021546727456423, 0.46419202339598786), (0.7951628297672293, 0.49263630135869474), 
@@ -8,15 +7,12 @@ def main():
               (0.33691411899985035, 0.8402045183219995), (0.33244488399729255, 0.4524636520475205), 
               (0.11778991601260325, 0.6657734204021165), (0.9384303415747769, 0.2313873874340855)]
 
-    # alpha = AlphaFiltration(points).build()
-
-    # for value in alpha.threshold_values():
-    #     AlphaFiltration.draw(points, alpha, time=value)
-
-    vr = VitorisRipsFiltration(points).build()
+    vr = VietorisRipsFiltration(points).build()
 
     for v in vr.threshold_values():
         print(v)
+
+    print(vr.face_set)
 
 if __name__ == "__main__":
     main()
