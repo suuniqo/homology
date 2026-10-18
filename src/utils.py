@@ -21,30 +21,21 @@ def sq_distance(p: tuple[float, ...], q: tuple[float, ...]) -> float:
     
     return sum((pk - qk)**2 for pk, qk in zip(p, q))
 
-def distance_to_center(p: tuple[float, ...], q: tuple[float, ...], r: tuple[float, ...]) -> float:
-    """Return the circumradius from three points using Heron's formula."""
-    if len(p) != len(q) or len(q) != len(r):
-        raise ValueError("Points have different dimensions!")
+def circumradius(p: tuple[float, ...], q: tuple[float, ...], r: tuple[float, ...]) -> float:
+    """Return the circumradius of the triangle through three points."""
+    ax, ay = p[0] - r[0], p[1] - r[1]
+    bx, by = q[0] - r[0], q[1] - r[1]
 
-    # Lengths of sides
-    a = math.dist(p, q)
-    b = math.dist(q, r)
-    c = math.dist(r, p)
-    
-    # Semi-perimeter
-    s = (a + b + c) / 2
-    
-    # Area using Heron's Formula
-    area_sq = s * (s - a) * (s - b) * (s - c)
+    cross = ax * by - ay * bx
 
-    if area_sq <= 0:
-        raise ValueError("Points are collinear.")
+    if cross == 0.0:
+        raise ValueError("Points are collinear!")
 
-    area = math.sqrt(area_sq)
-    
-    # Circumradius
-    radius = (a * b * c) / (4 * area)
-    return radius
+    la  = math.hypot(ax, ay)
+    lb  = math.hypot(bx, by)
+    lab = math.hypot(ax - bx, ay - by)
+
+    return la * lb * lab / (2.0 * abs(cross))
 
 def median_point(p: tuple[float, ...], q: tuple[float, ...]) -> tuple[float, ...]:
     """Return the midpoint between two points."""

@@ -1,26 +1,30 @@
-import utils
 import math
+import utils
 
 from typing import Optional
 
-import matplotlib.pyplot as plt
 import matplotlib.colors
+import matplotlib.pyplot as plt
 
-from scipy.spatial import Voronoi, voronoi_plot_2d
 from scipy.spatial import Delaunay
+from scipy.spatial import Voronoi, voronoi_plot_2d
 
 from simplex import Simplex
 from filtered_simplicial_complex import FilteredSimplicialComplex
 
 
 class AlphaFiltration:
-    """Builds the Alpha complex filtration of a planar point cloud."""
+    """Factory for building the Alpha complex filtration of a planar point cloud."""
 
     def __init__(self, points: list[tuple[float, ...]]) -> None:
-        self.points: list[tuple[float, ...]] = points
+        """Initialize the factory with a point cloud."""
+        self._points: list[tuple[float, ...]] = points
+        self._dist_map: dict[tuple[int, int], float] = {}
+        self._n = len(points)
 
     @staticmethod
     def plot_2d(points: list[tuple[float, ...]], fsc: FilteredSimplicialComplex, time: Optional[float] = None) -> None:
+        """Plot the point cloud and the alpha complex at the given time."""
         if time is None:
             sc = fsc.sc
         else:
@@ -49,61 +53,74 @@ class AlphaFiltration:
                 )
 
         plt.show()
-        
+
+    def _circumradius(self, u: int, v: int, w: int) -> float:
+        """Return the circumradius of the triangle through three vertices."""
+        return utils.circumradius(self._points[u], self._points[v], self._points[w])
+
+    def _sq_dist(self, u: int, v: int) -> float:
+        """Return the squared distance between two vertices, cached by index pair."""
+        key = (u, v)
+
+        if key not in self._dist_map:
+            self._dist_map[key] = utils.sq_distance(self._points[key[0]], self._points[key[1]])
+
+        return self._dist_map[key]
+
+    def _is_gabriel_edge(self, u: int, v: int, w: int) -> bool:
+        """Return whether the edge is Gabriel with respect to the opposite vertex."""
+        x, y, z = self._points[u], self._points[v], self._points[w]
+
+        if utils.sq_distance(utils.median_point(x, y), z) < self._sq_dist(u, v) / 4:
+            return False
+
+        return True
+
 
     def build(self) -> FilteredSimplicialComplex:
-        # The FilteredSimplicialComplex doesn't support updating the filtration value
-        three_dims = {}
-        two_dims = {}
+        """Builds the alpha filtration of the point cloud."""
+        triangle_map = {}
+        edge_map = {}
+        incident_min = {}
+        not_gabriel = set()
 
-        n = len(self.points)
+        # Generate the Delaunay complex with sorted triangles
+        delaunay = Delaunay(self._points)
 
-        dist = {
-            i : {
-                j: utils.sq_distance(self.points[i], self.points[j])
-                for j in range(n)
-            }
-            for i in range(n)
-        }
+        for simplex in delaunay.simplices:
+            u, v, w = sorted(simplex)
 
-        sc = FilteredSimplicialComplex(Simplex((i,)) for i in range(n))
+            center = self._circumradius(u, v, w)
 
-        # Generate the Delaunay complex
-        dl = Delaunay(self.points)
+            # 1. The time of the triangle is it's circumradius
+            triangle_map[(u, v, w)] = center
 
-        for simplex in dl.simplices:
-            [u, v, w] = sorted(simplex)
+            # 2. The time of the edge has two cases
+            for (a, b), opposite in (((u, v), w), ((u, w), v), ((v, w), u)):
+                incident_min[(a, b)] = min(incident_min.get((a, b), math.inf), center)
 
-            # Assume fist case for the three edges
-            if (u, v) not in two_dims:
-                two_dims[(u, v)] = math.sqrt(dist[u][v]) / 2
+                if self._is_gabriel_edge(a, b, opposite):
+                    # 2b. Gabriel case: the time is the distance divided by 2
+                    edge_map.setdefault((a, b), math.sqrt(self._sq_dist(a, b)) / 2)
+                else:
+                    not_gabriel.add((a, b))
 
-            if (u, w) not in two_dims:
-                two_dims[(u, w)] = math.sqrt(dist[u][w]) / 2
+        # 2a. Non-Gabriel case: the smallest circumradius among the incident triangles.
+        for edge, smallest in incident_min.items():
+            if edge in not_gabriel:
+                edge_map[edge] = smallest
+            else:
+                edge_map[edge] = min(edge_map[edge], smallest)
 
-            if (v, w) not in two_dims:
-                two_dims[(v, w)] = math.sqrt(dist[v][w]) / 2
+        # Add the points
+        sc = FilteredSimplicialComplex(Simplex((i,)) for i in range(self._n))
 
-            x, y, z = self.points[u], self.points[v], self.points[w]
-
-            # The triangle is added always in this time
-            center = utils.distance_to_center(x, y, z)
-            three_dims[(u, v, w)] = center
-
-            # Check if the edges use the second case
-            if utils.sq_distance(utils.median_point(x, y), z) < (dist[u][v] / 4):
-                two_dims[(u, v)] = center
-
-            if utils.sq_distance(utils.median_point(x, z), y) < (dist[u][w] / 4):
-                two_dims[(u, w)] = center
-
-            if utils.sq_distance(utils.median_point(y, z), x) < (dist[v][w] / 4):
-                two_dims[(v, w)] = center
-
-        for simpl, value in two_dims.items():
+        # Add the edges
+        for simpl, value in edge_map.items():
             sc.insert([Simplex(simpl)], value)
 
-        for simpl, value in three_dims.items():
+        # Add the triangles
+        for simpl, value in triangle_map.items():
             sc.insert([Simplex(simpl)], value)
 
         return sc

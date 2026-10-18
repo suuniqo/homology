@@ -13,12 +13,12 @@ class VietorisRipsFiltration:
     """Builds the Vietoris-Rips filtered simplicial complex of a point cloud."""
 
     def __init__(self, points: list[tuple[float, ...]]):
+        """Initialize the filtration with a point cloud."""
         self.points = points
         self.sc = FilteredSimplicialComplex(Simplex((i,)) for i in range(len(points)))
 
     def _max_simplex(self, simplex: Simplex, neigs: dict[int, set[int]]) -> set[Simplex]:
-        # print(simplex.vertices)
-        # TODO: Make `res` a accumulation parameter instead of returning and copying it
+        """Return the maximal simplices extending the given simplex."""
         res = set()
 
         common_neigs = reduce(lambda x, y: x.intersection(y), (neigs[u] for u in simplex.vertices))
@@ -32,6 +32,7 @@ class VietorisRipsFiltration:
         return res
 
     def build(self) -> FilteredSimplicialComplex:
+        """Build the Vietoris-Rips filtration of the point cloud."""
         n = len(self.points)
         dist = {
             i : {
@@ -69,4 +70,3 @@ class VietorisRipsFiltration:
                 )
 
         return self.sc
-
