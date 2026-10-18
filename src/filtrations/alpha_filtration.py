@@ -71,10 +71,7 @@ class AlphaFiltration:
         """Return whether the edge is Gabriel with respect to the opposite vertex."""
         x, y, z = self._points[u], self._points[v], self._points[w]
 
-        if utils.sq_distance(utils.median_point(x, y), z) < self._sq_dist(u, v) / 4:
-            return False
-
-        return True
+        return 4 * utils.sq_distance(utils.midpoint(x, y), z) >= self._sq_dist(u, v)
 
 
     def build(self) -> FilteredSimplicialComplex:

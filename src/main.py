@@ -1,5 +1,4 @@
 from filtrations.alpha_filtration import AlphaFiltration
-from filtrations.vietoris_rips_filtration import VietorisRipsFiltration
 
 def alpha(points):
     alpha = AlphaFiltration(points).build()

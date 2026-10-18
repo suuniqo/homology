@@ -37,7 +37,7 @@ def circumradius(p: tuple[float, ...], q: tuple[float, ...], r: tuple[float, ...
 
     return la * lb * lab / (2.0 * abs(cross))
 
-def median_point(p: tuple[float, ...], q: tuple[float, ...]) -> tuple[float, ...]:
+def midpoint(p: tuple[float, ...], q: tuple[float, ...]) -> tuple[float, ...]:
     """Return the midpoint between two points."""
     if len(p) != len(q):
         raise ValueError("Points have different dimensions!")
