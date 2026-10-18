@@ -10,7 +10,7 @@ from filtered_simplicial_complex import FilteredSimplicialComplex
 
 
 class VietorisRipsFiltration:
-    """Builds the Vietoris-Rips filtered simplicial complex of a point cloud."""
+    """Factory for building the Vietoris-Rips filtration of a point cloud."""
 
     def __init__(self, points: list[tuple[float, ...]]):
         """Initialize the filtration with a point cloud."""

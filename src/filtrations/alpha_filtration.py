@@ -14,7 +14,7 @@ from filtered_simplicial_complex import FilteredSimplicialComplex
 
 
 class AlphaFiltration:
-    """Factory for building the Alpha complex filtration of a planar point cloud."""
+    """Factory for building the Alpha filtration of a planar point cloud."""
 
     def __init__(self, points: list[tuple[float, ...]]) -> None:
         """Initialize the factory with a point cloud."""
@@ -75,7 +75,7 @@ class AlphaFiltration:
 
 
     def build(self) -> FilteredSimplicialComplex:
-        """Builds the alpha filtration of the point cloud."""
+        """Build the Alpha filtration of the point cloud."""
         triangle_map = {}
         edge_map = {}
         incident_min = {}
