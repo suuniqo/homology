@@ -3,6 +3,7 @@ from typing import Iterable
 from collections import defaultdict
 from simplex import Simplex
 
+
 class SimplicialComplex:
     """Represents a simplicial complex: a set of simplices closed under taking faces."""
 

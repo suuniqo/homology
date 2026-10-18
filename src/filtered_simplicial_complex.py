@@ -12,19 +12,22 @@ class FilteredSimplicialComplex:
 
     def _finish_insertion(self, additions: set[Simplex], time: float) -> None:
         """Add simplices to the timestamp dictionary."""
+        if not additions:
+            return
+
         self.timestamps[time].update(additions)
 
         for addition in additions:
             self.time_of[addition] = time
 
-    def __init__(self, generator: Iterable[Simplex]) -> None:
+    def __init__(self, generator: Iterable[Simplex], time: float = 0.0) -> None:
         """Initialize the filtered complex with a set of simplices."""
         self.sc: SimplicialComplex = SimplicialComplex(generator)
 
         self.timestamps: dict[float, set[Simplex]] = defaultdict(set)
         self.time_of: dict[Simplex, float] = {}
 
-        self._finish_insertion(self.sc.face_set, 0.0)
+        self._finish_insertion(self.sc.face_set, time)
 
     @property
     def face_set(self) -> set[Simplex]:

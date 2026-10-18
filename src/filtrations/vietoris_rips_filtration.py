@@ -1,11 +1,13 @@
+import math
+import utils
+
 from collections import defaultdict
 from itertools import product
 from functools import reduce
-import math
 
 from simplex import Simplex
 from filtered_simplicial_complex import FilteredSimplicialComplex
-import utils
+
 
 class VietorisRipsFiltration:
     """Builds the Vietoris-Rips filtered simplicial complex of a point cloud."""

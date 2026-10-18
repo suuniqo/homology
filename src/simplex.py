@@ -8,6 +8,8 @@ class Simplex:
 
     def __init__(self, vertices: tuple[int, ...]) -> None:
         """Initialize the Simplex object by providing the set of vertices."""
+
+        # the vertices are sorted, so that the simplices (1,2,3) and (3,2,1) get the same representation
         verts = tuple(sorted(vertices))
 
         if len(set(verts)) != len(verts):

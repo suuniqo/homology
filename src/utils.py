@@ -1,5 +1,6 @@
 import math
 
+
 def power_set(elems: tuple[int, ...]) -> list[tuple[int, ...]]:
     """Return a list of all subsets as tuples."""
     n = len(elems)
