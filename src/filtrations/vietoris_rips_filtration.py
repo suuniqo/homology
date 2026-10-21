@@ -17,17 +17,37 @@ class VietorisRipsFiltration:
         self.points = points
         self.sc = FilteredSimplicialComplex(Simplex((i,)) for i in range(len(points)))
 
-    def _max_simplex(self, simplex: Simplex, neigs: dict[int, set[int]]) -> set[Simplex]:
+    # def _max_simplex(self, u: int, v: int , neigs: dict[int, set[int]]) -> set[Simplex]:
+    #     """Return the maximal simplices extending the given simplex."""
+
+    #     res = set()
+
+    #     for simpl in self.sc.face_set:
+    #         if not v in simpl.vertices:
+    #             continue
+
+    #         if u in reduce(lambda x, y: x.intersection(y), (neigs[w] for w in simpl.vertices)):
+    #             new = Simplex(tuple(list(simpl.vertices) + [u]))
+    #             if new not in self.sc.face_set:
+    #                 res.add(new)
+
+    #     return res 
+
+    def _max_simplex(self, simplex: Simplex, common_neigs: set[int], neigs: dict[int, set[int]]) -> set[Simplex]:
         """Return the maximal simplices extending the given simplex."""
         res = set()
 
-        common_neigs = reduce(lambda x, y: x.intersection(y), (neigs[u] for u in simplex.vertices))
+        for w in sorted(common_neigs):
+            new = Simplex(tuple(list(simplex.vertices) + [w]))
+            res.add(new)
 
-        for v in common_neigs:
-            # Generates simplex `simplex` + [v]
-            new_simplicial = Simplex(tuple(list(simplex.vertices) + [v]))
-            res.add(new_simplicial)
-            res.update(self._max_simplex(new_simplicial, neigs).difference(self.sc.face_set))
+            res.update(
+                self._max_simplex(
+                    new,
+                    {x for x in common_neigs if x > w}.intersection(neigs[w]),
+                    neigs
+                )
+            )
 
         return res
 
@@ -60,13 +80,11 @@ class VietorisRipsFiltration:
                 neig[u].add(v)
                 neig[v].add(u)
 
+                # self.sc.insert(self._max_simplex(u, v, neig), time)
+                
                 self.sc.insert(
-                    (
-                        simpl 
-                        for simpl in self._max_simplex(simplicial, neig) 
-                        if simpl not in self.sc.face_set
-                    ), 
+                    self._max_simplex(simplicial, neig[u].intersection(neig[v]), neig), 
                     time
                 )
-
+            
         return self.sc

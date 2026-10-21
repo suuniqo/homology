@@ -1,10 +1,28 @@
 from filtrations.alpha_filtration import AlphaFiltration
+from filtrations.vietoris_rips_filtration import VietorisRipsFiltration
+
+import time
+import random
 
 def alpha(points):
     alpha = AlphaFiltration(points).build()
 
     for time in alpha.threshold_values():
         AlphaFiltration.plot_2d(points, alpha, time)
+
+def random_points(n, seed=0):
+    random.seed(seed)
+    pts = [(random.random(), random.random()) for _ in range(n)]
+    return pts
+
+def rips(points):
+    points = random_points(14)
+    start = time.perf_counter()
+    rips = VietorisRipsFiltration(points).build()
+    end = time.perf_counter()
+
+    print(end - start)
+    print(len(rips.filtration_order))
 
 def main():
     points = [(0.38021546727456423, 0.46419202339598786), (0.7951628297672293, 0.49263630135869474), 
@@ -13,7 +31,8 @@ def main():
               (0.33691411899985035, 0.8402045183219995), (0.33244488399729255, 0.4524636520475205), 
               (0.11778991601260325, 0.6657734204021165), (0.9384303415747769, 0.2313873874340855)]
 
-    alpha(points)
+    # alpha(points)
+    rips(points)
 
 
 if __name__ == "__main__":
