@@ -3,7 +3,6 @@ import homology.utils as utils
 
 from collections import defaultdict
 from itertools import product
-from functools import reduce
 
 from homology.simplex import Simplex
 from homology.filtered_simplicial_complex import FilteredSimplicialComplex
@@ -37,19 +36,10 @@ class VietorisRipsFiltration:
 
     def build(self) -> FilteredSimplicialComplex:
         """Build the Vietoris-Rips filtration of the point cloud."""
-        dist = {
-            i : {
-                j: utils.sq_distance(self._points[i], self._points[j])
-                for j in range(self._n) 
-                if i != j
-            }
-            for i in range(self._n)
-        }
-
         dist_rev: dict[float, set[Simplex]] = defaultdict(set)
         for i, j in product(range(self._n), repeat=2):
-            if i != j:
-                d = dist[i][j]
+            if i < j:
+                d = utils.sq_distance(self._points[i], self._points[j])
                 dist_rev[d].update([Simplex((i, j))])
 
         neig: dict[int, set[int]] = defaultdict(set)
