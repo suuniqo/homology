@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Iterable
+
 from collections import defaultdict
-from simplex import Simplex
+from collections.abc import Iterable
+
+from homology.simplex import Simplex
 
 
 class SimplicialComplex:

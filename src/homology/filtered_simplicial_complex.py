@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
-from simplex import Simplex
-from simplicial_complex import SimplicialComplex
+from typing import Optional
+
+from homology.simplex import Simplex
+from homology.simplicial_complex import SimplicialComplex
 
 
 class FilteredSimplicialComplex:

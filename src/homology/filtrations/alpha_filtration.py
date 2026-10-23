@@ -1,5 +1,5 @@
 import math
-import utils
+import homology.utils as utils
 
 from typing import Optional
 
@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial import Voronoi, voronoi_plot_2d
 
-from simplex import Simplex
-from filtered_simplicial_complex import FilteredSimplicialComplex
+from homology.simplex import Simplex
+from homology.filtered_simplicial_complex import FilteredSimplicialComplex
 
 
 class AlphaFiltration:

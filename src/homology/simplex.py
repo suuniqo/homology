@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import utils
+import homology.utils as utils
 
 
 class Simplex:

@@ -1,3 +1,5 @@
+"""General utility functions for common math operations."""
+
 import math
 
 

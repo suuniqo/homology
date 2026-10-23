@@ -1,5 +1,5 @@
-from filtrations.alpha_filtration import AlphaFiltration
-from filtrations.vietoris_rips_filtration import VietorisRipsFiltration
+from homology.filtrations.alpha_filtration import AlphaFiltration
+from homology.filtrations.vietoris_rips_filtration import VietorisRipsFiltration
 
 import time
 import random
