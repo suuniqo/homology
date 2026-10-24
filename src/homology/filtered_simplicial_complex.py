@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Iterable
-
 from typing import Optional
 
 from homology.simplex import Simplex

@@ -1,16 +1,13 @@
 import math
-import homology.utils as utils
-
 from typing import Optional
 
 import matplotlib.colors
 import matplotlib.pyplot as plt
+from scipy.spatial import Delaunay, Voronoi, voronoi_plot_2d
 
-from scipy.spatial import Delaunay
-from scipy.spatial import Voronoi, voronoi_plot_2d
-
-from homology.simplex import Simplex
+import homology.utils as utils
 from homology.filtered_simplicial_complex import FilteredSimplicialComplex
+from homology.simplex import Simplex
 
 
 class AlphaFiltration:

@@ -1,11 +1,10 @@
 import math
-import homology.utils as utils
-
 from collections import defaultdict
 from itertools import product
 
-from homology.simplex import Simplex
+import homology.utils as utils
 from homology.filtered_simplicial_complex import FilteredSimplicialComplex
+from homology.simplex import Simplex
 
 
 class VietorisRipsFiltration:

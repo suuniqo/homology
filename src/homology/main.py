@@ -1,8 +1,12 @@
+import random
+import time
+
 from homology.filtrations.alpha_filtration import AlphaFiltration
 from homology.filtrations.vietoris_rips_filtration import VietorisRipsFiltration
+from homology.matrix_simplicial_complex import MatrixSimplicialComplex
+from homology.simplex import Simplex
+from homology.simplicial_complex import SimplicialComplex
 
-import time
-import random
 
 def alpha(points):
     alpha = AlphaFiltration(points).build()
@@ -24,6 +28,13 @@ def rips(points):
     print(end - start)
     print(len(rips.filtration_order))
 
+def matrix():
+    sc = SimplicialComplex([Simplex((0, 1, 2, 3))])
+    msc = MatrixSimplicialComplex(sc)
+
+    for i in range(4):
+        print(f"betti({i}) = {msc.betti_number(i)}")
+
 def main():
     points = [(0.38021546727456423, 0.46419202339598786), (0.7951628297672293, 0.49263630135869474), 
               (0.566623772375203, 0.038325621649018426), (0.3369306814864865, 0.7103735061134965), 
@@ -32,7 +43,8 @@ def main():
               (0.11778991601260325, 0.6657734204021165), (0.9384303415747769, 0.2313873874340855)]
 
     # alpha(points)
-    rips(points)
+    # rips(points)
+    matrix()
 
 
 if __name__ == "__main__":
