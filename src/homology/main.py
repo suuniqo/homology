@@ -7,7 +7,6 @@ from homology.matrix_simplicial_complex import MatrixSimplicialComplex
 from homology.simplex import Simplex
 from homology.simplicial_complex import SimplicialComplex
 
-
 def alpha(points):
     alpha = AlphaFiltration(points).build()
 
@@ -45,7 +44,6 @@ def main():
     # alpha(points)
     # rips(points)
     matrix()
-
 
 if __name__ == "__main__":
     main()
