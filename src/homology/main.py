@@ -1,49 +1,25 @@
 import random
 import time
 
+from homology.factory.simplicial_complex_factory import SimplicialComplexFactory
 from homology.filtrations.alpha_filtration import AlphaFiltration
 from homology.filtrations.vietoris_rips_filtration import VietorisRipsFiltration
 from homology.matrix_simplicial_complex import MatrixSimplicialComplex
 from homology.simplex import Simplex
 from homology.simplicial_complex import SimplicialComplex
 
-def alpha(points):
-    alpha = AlphaFiltration(points).build()
-
-    for time in alpha.threshold_values():
-        AlphaFiltration.plot_2d(points, alpha, time)
-
-def random_points(n, seed=0):
-    random.seed(seed)
-    pts = [(random.random(), random.random()) for _ in range(n)]
-    return pts
-
-def rips(points):
-    points = random_points(14)
-    start = time.perf_counter()
-    rips = VietorisRipsFiltration(points).build()
-    end = time.perf_counter()
-
-    print(end - start)
-    print(len(rips.filtration_order))
-
-def matrix():
-    sc = SimplicialComplex([Simplex((0, 1, 2, 3))])
-    msc = MatrixSimplicialComplex(sc)
-
-    for i in range(4):
-        print(f"betti({i}) = {msc.betti_number(i)}")
-
 def main():
-    points = [(0.38021546727456423, 0.46419202339598786), (0.7951628297672293, 0.49263630135869474), 
-              (0.566623772375203, 0.038325621649018426), (0.3369306814864865, 0.7103735061134965), 
-              (0.08272837815822842, 0.2263273314352896), (0.5180166301873989, 0.6271769943824689), 
-              (0.33691411899985035, 0.8402045183219995), (0.33244488399729255, 0.4524636520475205), 
-              (0.11778991601260325, 0.6657734204021165), (0.9384303415747769, 0.2313873874340855)]
+    alpha1 = SimplicialComplexFactory.alpha_complex_example(0.00)
+    alpha2 = SimplicialComplexFactory.alpha_complex_example(0.14)
 
-    # alpha(points)
-    # rips(points)
-    matrix()
+    mat1 = MatrixSimplicialComplex(alpha1)
+    mat2 = MatrixSimplicialComplex(alpha2)
+
+    print(f"[incremental] alpha1: {alpha1.betti_planar()}")
+    print(f"[boundarymat] alpha1: {(mat1.betti_number(0), mat1.betti_number(1))}")
+
+    print(f"[incremental] alpha2: {alpha2.betti_planar()}")
+    print(f"[boundarymat] alpha2: {(mat2.betti_number(0), mat2.betti_number(1))}")
 
 if __name__ == "__main__":
     main()

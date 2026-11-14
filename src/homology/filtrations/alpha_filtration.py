@@ -5,7 +5,7 @@ import matplotlib.colors
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay, Voronoi, voronoi_plot_2d
 
-import homology.utils as utils
+import homology.utils.math as utils
 from homology.filtered_simplicial_complex import FilteredSimplicialComplex
 from homology.simplex import Simplex
 

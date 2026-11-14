@@ -4,6 +4,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 from homology.simplex import Simplex
+from homology.utils.DSU import DSU
 
 
 class SimplicialComplex:
@@ -120,3 +121,37 @@ class SimplicialComplex:
                 self.dim = simplex.dim()
 
         self.euler_characteristic += self._euler_characteristic(additions)
+
+    def betti_planar(self) -> tuple[int, int]:
+        """Computes the pair of betti numbers describing a planar simplicial complex."""
+
+        dsu = DSU()
+
+        betta_0 = 0
+        betta_1 = 0
+
+        edges = []
+
+        for face in self._face_set:
+            match face.dim():
+                case 0:
+                    betta_0 += 1
+                    dsu.make_set(face.vertices[0])
+                case 1:
+                    edges.append(face.vertices)
+                case 2:
+                    betta_1 -= 1
+                case _:
+                    raise ValueError("The algorithm only works if the simplicial complex is planar")
+        
+        for u, v in edges:
+            repr_u = dsu.find_set(u)
+            repr_v = dsu.find_set(v)
+
+            if repr_u == repr_v:
+                betta_1 += 1
+            else:
+                dsu.union_set(repr_u, repr_v)
+                betta_0 -= 1
+        
+        return (betta_0, betta_1)

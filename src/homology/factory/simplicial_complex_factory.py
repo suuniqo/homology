@@ -96,25 +96,8 @@ class SimplicialComplexFactory:
         ))
 
     @staticmethod
-    def alpha_complex_example_1() -> SimplicialComplex:
+    def alpha_complex_example(r: float) -> SimplicialComplex:
         """Return the alpha complex of the first point cloud at radius 0.2."""
-        r = 0.20
-        points = [
-            (0.38021546727456423, 0.4641920233959878), (0.7951628297672293, 0.4926363013586947),
-            (0.566623772375203, 0.038325621649018426), (0.3369306814864865, 0.7103735061134965),
-            (0.08272837815822842, 0.2263273314352896), (0.5180166301873989, 0.6271769943824689),
-            (0.33691411899985035, 0.8402045183219995), (0.33244488399729255, 0.452463652047520),
-            (0.11778991601260325, 0.6657734204021165), (0.9384303415747769, 0.2313873874340855)
-        ]
-
-        alpha_filtration = AlphaFiltration(points).build()
-
-        return alpha_filtration.filtration(r)
-
-    @staticmethod
-    def alpha_complex_example_2() -> SimplicialComplex:
-        """Return the alpha complex of the first point cloud at radius 1.0."""
-        r = 1.00
         points = [
             (0.38021546727456423, 0.4641920233959878), (0.7951628297672293, 0.4926363013586947),
             (0.566623772375203, 0.038325621649018426), (0.3369306814864865, 0.7103735061134965),
