@@ -127,31 +127,27 @@ class SimplicialComplex:
 
         dsu = DSU()
 
-        betta_0 = 0
-        betta_1 = 0
+        beta_0 = 0
+        beta_1 = 0
 
         edges = []
 
         for face in self._face_set:
             match face.dim():
                 case 0:
-                    betta_0 += 1
+                    beta_0 += 1
                     dsu.make_set(face.vertices[0])
                 case 1:
                     edges.append(face.vertices)
                 case 2:
-                    betta_1 -= 1
+                    beta_1 -= 1
                 case _:
                     raise ValueError("The algorithm only works if the simplicial complex is planar")
         
         for u, v in edges:
-            repr_u = dsu.find_set(u)
-            repr_v = dsu.find_set(v)
-
-            if repr_u == repr_v:
-                betta_1 += 1
+            if dsu.union_set(u, v):
+                beta_0 -= 1
             else:
-                dsu.union_set(repr_u, repr_v)
-                betta_0 -= 1
+                beta_1 += 1
         
-        return (betta_0, betta_1)
+        return (beta_0, beta_1)
